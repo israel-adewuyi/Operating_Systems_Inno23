@@ -1,0 +1,87 @@
+    1  sudo apt update && sudo apt upgrade -y 
+    2  sudo apt update && sudo apt upgrade -y
+    3  su root
+    4  sudo apt update
+    5  sudo su
+    6  nano /etc/sudoers
+    7  vi /etc/sudoers
+    8  ps
+    9  sudo kill -9 18431
+   10  sudo kill -9 18493
+   11  sudo apt update
+   12  visudo
+   13  adduser israel sudo
+   14  cd root
+   15  visudo
+   16  su root
+   17  sudo apt update
+   18  sudo apt upgrade -y
+   19  sudo snap refresh
+   20  ps
+   21  nano namelist 
+   22  cat namelist
+   23  sort -n -r namelist > namelist.sorted
+   24  cat namelist.sorted
+   25  cat namelist
+   26  sort -n -r namelist > namelist
+   27  cat namelist
+   28  whoami
+   29  hostname
+   30  man <whoami>
+   31  man whoami
+   32  man
+   33  man man
+   34  man --help
+   35  clear
+   36  find /proc/ -name "*task*"
+   37  find /proc/ -name "*task*" 1> output.txt 2> errors.txt
+   38  cat output.txt
+   39  ls
+   40  nano notes &
+   41  fg %1
+   42  jobs
+   43  nano notes &
+   44  gedit notes2 &
+   45  cat notes > notes2
+   46  gedit notes2
+   47  jobs
+   48  kill %1
+   49  jobs
+   50  clear
+   51  mkdir ~/week01
+   52  cd week01
+   53  ls
+   54  ls usr
+   55  cd usr
+   56  cd /usr/bin
+   57  dir week01
+   58  dir /week01
+   59  cd
+   60  dir /week01
+   61  del  /week01
+   62  rm - week01
+   63  rm -r week01
+   64  ls
+   65  #!/bin/bash
+   66  jobs
+   67  process
+   68  clear
+   69  nano ex1.sh
+   70  chmod +x ex1.sh
+   71  ./ex1.sh
+   72  cd week01
+   73  ls
+   74  cd..
+   75  cd.
+   76  cd
+   77  ls
+   78  mv ex1.sh ~/week01
+   79  cd week01
+   80  ls
+   81  echo ex1.txt
+   82  cat ex1`
+   83  cat ex1.txt
+   84  nano ex2.sh
+   85  chmod +x /ex2.sh
+   86  chmod +x ex2.sh
+   87  ./ex2.sh
