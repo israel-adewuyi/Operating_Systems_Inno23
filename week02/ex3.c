@@ -43,7 +43,7 @@ char* convert(long int number, int initial_base, int target_base){
         }
     }
 
-    printf("Converted number in base 10 is %ld\n", decimal);
+    //printf("Converted number in base 10 is %ld\n", decimal);
 
     return baseTenToBaseX(decimal, target_base);
 }
@@ -55,13 +55,13 @@ int main(){
     scanf("%ld %d %d", &number, &initial_base, &target_base);
 
     if(number < 0 || initial_base < 2 || initial_base > 10 || target_base < 2 || target_base > 10){
-        printf("Cannot convert \n");
+        printf("cannot convert! \n");
         return 1;
     }
 
-    printf("%s\n", convert(number, initial_base, target_base));
+    printf("%ld in base %d =====> %s.\n", number, target_base, convert(number, initial_base, target_base));
 
-    printf("Heere are my numbers, %ld, %d, %d \n", number, initial_base, target_base);
+    //printf("Heere are my numbers, %ld, %d, %d \n", number, initial_base, target_base);
     
     return 0;
 }
