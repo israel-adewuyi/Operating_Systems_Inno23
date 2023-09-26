@@ -48,6 +48,32 @@ void add_file(struct File *file, struct Directory *dir){
     //files
 }
 
+// Adds the subdirectory dir1 to the directory dir2
+void add_dir(struct Directory * dir1, struct Directory * dir2){
+    if (dir1 && dir2){
+        dir2->directories = realloc(dir2->directories, (dir2->nd + 1) * sizeof(struct Directory));
+
+        dir2->directories[dir2->nd] = *dir1;
+
+        dir2->nd++;
+
+        char temp_path[MAX_PATH_LENGTH];
+
+        if (strcmp(dir2->path, "/")){
+            strcpy(temp_path, dir2->path);
+            strcat(temp_path, "/");
+            strcat(temp_path, dir1->name);
+            strcpy(dir1->path, temp_path);
+        }
+        else{
+            strcpy(temp_path, "/");
+            strcat(temp_path, dir1->name);
+            strcpy(dir1->path, temp_path);
+        }
+    }
+}
+
+
 int main(){
     struct Directory root;
     strcpy(root.name, "/");
@@ -62,17 +88,18 @@ int main(){
     strcpy(home.name, "home");
     home.nf = 0;
     home.nd = 0;
-    sprintf(home.path, "/%s", home.name);
     home.files = NULL;
     home.directories = NULL;
+    add_dir(&home, &root);
+    
 
     struct Directory bin;
     strcpy(bin.name, "bin");
     bin.nf = 0;
     bin.nd = 0;
-    sprintf(bin.path, "/%s", bin.name);
     bin.files = NULL;
     bin.directories = NULL;
+    add_dir(&bin, &root);
 
     struct File bash;
     bash.id = 1;
@@ -91,7 +118,7 @@ int main(){
     ex3_1.directory = &home;
     add_file(&ex3_1, &home);
 
-    ex3_2.id = 2;
+    ex3_2.id = 3;
     strcpy(ex3_2.name, "ex3_2.c");
     strcpy(ex3_2.data, "//This is a comment in C language");
     ex3_2.size = strlen(ex3_2.data);
@@ -107,7 +134,6 @@ int main(){
     printp_file(&ex3_2);
 
     free(home.files);
-
 
     return 0;
 }
