@@ -134,6 +134,7 @@ int main(){
     printp_file(&ex3_2);
 
     free(home.files);
+    free(bin.files);
 
     return 0;
 }

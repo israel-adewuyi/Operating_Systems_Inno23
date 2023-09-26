@@ -90,14 +90,21 @@ int main(){
     double initial_multiplication_value_double = 1.0;
     double initial_min_value_double = DBL_MIN;
 
-    double * addition_result_int = aggregate(doubleArray, sizeof(double), 5, &initial_addition_value , addition);
-    printf("The result of addition of the double array is : %f\n", *addition_result_int);
+    double * addition_result_double = aggregate(doubleArray, sizeof(double), 5, &initial_addition_value , addition);
+    printf("The result of addition of the double array is : %f\n", *addition_result_double);
 
     double * multiplication_result_double = aggregate(doubleArray, sizeof(double),  5, &initial_multiplication_value_double, multiplication);
     printf("The result of multiplication of the integer array is : %f\n", *multiplication_result_double);
 
     double *maxValue_double = aggregate(doubleArray, sizeof(double), 5, &initial_min_value_double, maximum_number);
     printf("The maximum value in the double array is : %f\n", *maxValue_double);
+
+    free(result);
+    free(multiplication_result);
+    free(maxValue);
+    free(addition_result_double);
+    free(multiplication_result_double);
+    free(maxValue_double);
 
     return 0;
 }
