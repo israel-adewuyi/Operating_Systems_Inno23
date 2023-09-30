@@ -28,8 +28,8 @@ int main(){
         exit(0);
     }
 
-
-
+    wait(NULL);
+    wait(NULL);
 
     return 0;
 }

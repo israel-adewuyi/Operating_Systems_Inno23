@@ -1,0 +1,10 @@
+Process 0: 34877
+Process 1: 34033
+Process 5: 40325
+Process 7: 31105
+Process 6: 22938
+Process 4: 36494
+Process 8: 32548
+Process 3: 26274
+Process 9: 31869
+Process 2: 30369
