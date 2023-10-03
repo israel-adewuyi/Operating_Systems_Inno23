@@ -1,0 +1,18 @@
+After each fork() call, a new child process is created, for each running process. Initially, it was only the parent process running. I observed that after each fork call, a new child process is created from all the existing processes. 
+
+The results of each iteration for both n's are summarised below. 
+
+N = 3
+After iteration 1 - 2 processes
+After iteration 2 - 4 processes
+After iteration 3 - 8 processes
+
+N = 5
+After iteration 1 - 2  processes
+After iteration 2 - 4  processes
+After iteration 3 - 8  processes
+After iteration 4 - 16 processes
+After iteration 5 - 32 processes
+
+
+For each i from 1 to N, after the ith iteration, there are 2^i processes in the end. 
