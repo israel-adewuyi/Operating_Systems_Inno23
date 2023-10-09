@@ -1,0 +1,6 @@
+In a manner similar to ex3, we are using m threads to count prime numbers in the range [0, n).
+
+In contrast to ex3, where the interval was divided, this time the m threads alternately use the global routines (get_number_to_check & increment_primes) to prevent over counting.
+
+The execution times are similar to those of ex3.
+
