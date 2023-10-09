@@ -1,0 +1,5 @@
+In ex3, we split the problem of counting prime numbers in the range [0, n) among m threads. 
+
+Each thread computes the result for an interval of length n / m, and we combine the results from them after each thread completes. 
+
+From the execution times in ex3.txt we can see that the more threads we have, the less REAL time it takes to compute the count of prime numbers.
