@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-//primality test
 bool is_prime(int n){
     if (n <= 1)return false;
     int i = 2;
@@ -15,7 +14,7 @@ bool is_prime(int n){
     return true;
 }
 
-//Primes counter in [a, b)
+
 int primes_count(int a, int b){
     int ret = 0;
     for(int i = a; i < b; i++){
@@ -26,19 +25,18 @@ int primes_count(int a, int b){
     return ret;
 }
 
-// argument to the start_routine of the thread
 typedef struct prime_request {
     int a, b;
 } prime_request ;
 
-// start_routine of the thread
+
 void * prime_counter ( void *arg) {
-    // get the request from arg
+    
     prime_request * req = (prime_request*) arg;
-    // perform the request
+    
     int * count = malloc(sizeof(int));
     *count = primes_count(req->a, req->b);
-    //return count;
+    
     return (( void *) count );
 }
 

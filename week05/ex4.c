@@ -14,7 +14,6 @@ bool is_prime(int n){
     return true;
 }
 
-
 int n = 0;
 
 pthread_mutex_t global_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -52,7 +51,6 @@ void *check_primes(void *arg) {
         }
     }  
 }
-
 
 int main(int argc, char *argv[]) {
     int n_threads = atoi(argv[2]);

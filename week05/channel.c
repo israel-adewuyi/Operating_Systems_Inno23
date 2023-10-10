@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
         puts("An error occured while opening pipe");
     }
 
-    pid_t publisher = fork;
+    pid_t publisher = fork();
 
     if(publisher == 0){
         char message[MAX_LEN];

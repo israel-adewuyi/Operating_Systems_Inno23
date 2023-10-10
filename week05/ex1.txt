@@ -1,0 +1,5 @@
+The main reason for creating n named pipes for n subscribers is to isolate communication 
+between the publisher and each subscriber. Each named pipe allows messages to flow 
+between the publisher and a specific subscriber. 
+
+It also allows for parallel message delivery between the publisher and a number of subscribers, all at once.
