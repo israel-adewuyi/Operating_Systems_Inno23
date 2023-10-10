@@ -5,7 +5,7 @@ gcc -o publisher publisher.c
 gcc -o subscriber subscriber.c
 
 # Loop to open terminal windows and run subscribers
-for ((i = 1; i <= $1; i++)); do
+for i in $(seq 1 2) do
   gnome-terminal -- "./subscriber" $i
 done
 
