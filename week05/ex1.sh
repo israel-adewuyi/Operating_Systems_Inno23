@@ -1,15 +1,11 @@
 #!/bin/bash
+gcc publisher.c -o publisher
+gcc subscriber.c -o subscriber
 
-# Compile the publisher and subscriber programs
-gcc -o publisher publisher.c
-gcc -o subscriber subscriber.c
-
-# Loop to open terminal windows and run subscribers
-for i in $(seq 1 2) do
-  gnome-terminal -- "./subscriber" $i
+for n in $(seq 1 2); do
+  gnome-terminal -- "./subscriber" $n
 done
 
-# Start the publisher process in a new terminal
 gnome-terminal -- "./publisher" $1
 
 
