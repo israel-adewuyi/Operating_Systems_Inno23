@@ -18,7 +18,7 @@ void handler(int sig) {
         }
     }
     else{
-        printf("Program terminating.....\n");
+        printf("Process terminating.....\n");
         exit(EXIT_SUCCESS);
     }
 }
@@ -34,10 +34,8 @@ int main() {
         exit(1);
     }
     
-
-    // Register signal handlers
     signal(SIGUSR1, handler);
-    signal(SIGUSR2, SIG_IGN);
+    signal(SIGUSR2, handler);
 
     FILE *read_file = fopen("text.txt", "r");
     if (read_file != NULL) {
@@ -51,7 +49,7 @@ int main() {
     }
 
     while (1) {
-        sleep(1); // Sleep indefinitely
+        sleep(1);
     }
 
     return 0;
