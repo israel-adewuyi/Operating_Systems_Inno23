@@ -93,8 +93,6 @@ int main(int argc, char *argv[]){
       // Every time you find a new triangular number print the message:
       // "Process {process_idx} (PID=<{pid}>): I found this triangular number \e[0;31m{next_n}\e[0m\n"
       // and increase the count {tris}
-      
-      //next_n++;
     }
   
 }

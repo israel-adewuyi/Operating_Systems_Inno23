@@ -1,0 +1,4 @@
+ The main observation I noticed in the execution was that when the TRI_BASE was a small number, a lot more triangular numbers wer found. The other observation made was that there were no changes to the metrics of the processes. 
+ 
+ 
+ In new_data.txt, I replicated data.txt, but changed the arrival time to 0. I then compiled and passed new_data to scheduler and I noticed that the processes were executed in the order of their index i.e Process 0 -> Process 1 -> Process 2 -> Process 3 -> Process 4 -> Process 5 -> Process 6

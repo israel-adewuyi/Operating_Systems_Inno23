@@ -1,5 +1,7 @@
-gcc schedule.c -o schedule
+#!/bin/bash
+
+gcc scheduler.c -o scheduler
 gcc worker.c -o worker
 
-#./scheduler data.txt
+./scheduler new_data.txt
 #./worker
