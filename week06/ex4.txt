@@ -1,0 +1,3 @@
+The order of process execution, as expected is not straight forward.
+
+The average wait time and turn around time also appears to be greater than both FCFS and SJF.
