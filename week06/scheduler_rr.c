@@ -59,12 +59,6 @@ void read_file(FILE* file){
         ps[i] = 0;
         queue[i] = -1;
     }
-
-    //printf("This is the data.sizee, %d\n", data_size);
-    // TODO: extract the data of processes from the {file} 
-    // and store them in the array {data}
-    // initialize ps array to zeros (the process is terminated or not created yet)
-
 }
 
 // send signal SIGCONT to the worker process
@@ -103,28 +97,14 @@ void create_process(int new_process) {
     } else {
         pid_t child_pid = fork();
         if (child_pid == 0) {
-            // This is the child process
-
-
-            // Prepare command for exec (e.g., "./worker" "new_process")
             char process_idx_str[20];
             sprintf(process_idx_str, "%d", new_process);
             char *args[] = {"./worker", process_idx_str, NULL};
-
-
-            // Execute the worker program for the new process
             execvp(args[0], args);
-
-
-            // If execvp returns, it failed
             perror("Exec failed");
             exit(EXIT_FAILURE);
         } else if (child_pid > 0){
-            // 3. Add the child process to the ps array
             ps[new_process] = child_pid;
-
-
-            // 4. Update the running process
             running_process = new_process;
             data[new_process].rt = total_time - data[new_process].at;
             printf("Scheduler: Starting Process %d (Remaining Time: %d)\n", running_process,
@@ -135,35 +115,23 @@ void create_process(int new_process) {
             exit(EXIT_FAILURE);
         }
     }
-    // TODO: stop the running process
-
-    // TODO: fork a new process and add it to ps array
-
-    // TODO: Now the idx of the running process is new_process 
-
-    // TODO: The scheduler process runs the program "./worker {new_process}" 
-    // using one of the exec functions like execvp
-
 }
 
-ProcessData find_next_process() {
+void queue_update(){
     for (int i = 0; i < data_size; i++) {
         if (data[i].at <= total_time && data[i].burst > 0) {
             int valid_process = 0;
-            // Check if the process is already in the queue
             for (int j = 0; j < queue_size; j++) {
                 if (queue[j] == data[i].idx) {
                     valid_process = 1;
                     break;
                 }
             }
-            // If not in the queue, add it
             if (!valid_process) {
                 queue[queue_size++] = data[i].idx;
             }
         }
         if (data[i].burst == 0) {
-            // remove it from queue
             for (int j = 0; j < queue_size; j++) {
                 if (queue[j] == data[i].idx) {
                     queue[j] = -1;
@@ -172,8 +140,10 @@ ProcessData find_next_process() {
         }
     }
 
+}
 
-    // Find the next process to run
+ProcessData find_next_process() {
+    queue_update();
     int location = -1;
     if (queue_size > 0) {
         location = queue[0];
@@ -193,18 +163,13 @@ ProcessData find_next_process() {
 
 
         for(int i=0; i < data_size; i++) {
-            // Check if the process has arrived and hasn't been completed
             if (data[i].burst > 0 && data[i].at <= data[location].at) {
-                // If the location is not set (i.e., it's the first valid process found), or
-                // it's an FCFS algorithm and the current process arrived before the one in location,
-                // update the location to the current process
                 location = i;
             }
         }
 
 
         printf("Scheduler: Runtime: %u seconds.\nProcess %d: has not arrived yet.\n", total_time, location);
-        // increment the time
         total_time++;
         return find_next_process();
     }
@@ -262,22 +227,18 @@ void schedule_handler(int signum) {
         printf("Scheduler: Runtime: %u seconds\n", total_time);
         printf("Process %d is running with %d seconds left\n", running_process, data[running_process].burst);
 
-        // 1.A. If the worker process finished its burst time
         if (data[running_process].burst == 0) {
             printf("Scheduler: Terminating Process %d (Remaining Time: 0)\n", running_process);
             terminate(ps[running_process]);
-            int status;
-            waitpid(ps[running_process], &status, 0);
-
-            // Calculate metrics for the terminated process (ct, tat, wt)
+            waitpid(ps[running_process], NULL, 0);
+            
             data[running_process].ct = total_time;
             data[running_process].tat = data[running_process].ct - data[running_process].at;
             data[running_process].wt = data[running_process].tat - data[running_process].bt;
 
-
-            // Update the running process to indicate that there is no running process
             running_process = -1;
         }
+        queue_update();
     }
 
 
@@ -288,9 +249,7 @@ void schedule_handler(int signum) {
             suspend(ps[running_process]);
             printf("Scheduler: Stopping Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
         }
-        // 2. Find the next process to run
         ProcessData next_process = find_next_process();
-
 
         running_process = next_process.idx;
         data[running_process].quantum = global_quantum;
@@ -332,7 +291,7 @@ void schedule_handler(int signum) {
 }
 
 int main(int argc, char *argv[]) {
-    scanf("Enter the value of the quantum: %d", &global_quantum);
+    scanf("%d", &global_quantum);
     // read the data file
     FILE *in_file  = fopen(argv[1], "r");
   	if (in_file == NULL) {   

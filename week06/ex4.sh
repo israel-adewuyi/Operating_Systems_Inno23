@@ -1,3 +1,5 @@
+#!/bin/bash
+
 gcc scheduler_rr.c -o scheduler_rr
 gcc worker.c -o worker
 
