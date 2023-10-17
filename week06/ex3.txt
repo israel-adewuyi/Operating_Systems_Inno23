@@ -1,0 +1,5 @@
+The order of execution in this SJF algorithm is 4 -> 5 -> 0 -> 1 -> 6 -> 2 -> 3 while in the FCFS scheduling algorithm, the order of process execution was  4 -> 3 -> 5 -> 0 -> 1 -> 6 -> 2. 
+
+
+The SJF, for this batch of processes, happens to be more efficient, compared to FCFS, as it has a lesser average wait time (4.857143 VS 8.0000) and a lesser average turn around time (9.142858 VS 12.285714)
+

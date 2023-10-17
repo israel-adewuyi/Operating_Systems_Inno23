@@ -47,12 +47,6 @@ void read_file(FILE* file){
         data[data_size].burst = bt;
         data_size++;
     }
-
-    printf("This is the data.sizee, %d\n", data_size);
-    // TODO: extract the data of processes from the {file} 
-    // and store them in the array {data}
-    // initialize ps array to zeros (the process is terminated or not created yet)
-
 }
 
 // send signal SIGCONT to the worker process
@@ -93,9 +87,10 @@ void create_process(int new_process) {
     pid_t child_pid = fork();
 
     if (child_pid == 0) {
-        char process_idx_str[10];
+        char process_idx_str[20];
         sprintf(process_idx_str, "%d", new_process);
-        execlp("./worker", "./worker", process_idx_str, (char *)NULL);
+        char *args[] = {"./worker", process_idx_str, NULL};
+        execvp(args[0], args);
         perror("exec failed");
         exit(EXIT_FAILURE);
     } else if (child_pid > 0) {
@@ -185,13 +180,12 @@ void schedule_handler(int signum) {
 
     if (running_process != -1) {
         data[running_process].burst--;
-        printf("Scheduler: Runtime: %u seconds\n\n\n", total_time);
+        printf("Scheduler: Runtime: %u seconds\n", total_time);
         printf("Process %d is running with %d seconds left\n", running_process, data[running_process].burst);
 
         if (data[running_process].burst == 0) {
             printf("Scheduler: Terminating Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
             terminate(ps[running_process]);
-            //printf("I am killing process %d\n", running_process);
             waitpid(ps[running_process], NULL, 0);
             data[running_process].ct = total_time;
             data[running_process].tat = data[running_process].ct - data[running_process].at;
@@ -203,26 +197,13 @@ void schedule_handler(int signum) {
 
     ProcessData next_process = find_next_process();
 
-    printf("Next process is %d, %d\n", next_process.idx, next_process.burst);
     if (next_process.idx != running_process && data[running_process].burst == 0) {
-        if (running_process != -1) {
-            printf("Scheduler: Stopping Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
-            suspend(ps[running_process]);
-        }
-
         running_process = next_process.idx;
         if (ps[running_process] == 0) {
             create_process(running_process);
-        } else {
-            printf("Scheduler: Resuming Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
-            resume(ps[running_process]);
         }
         data[running_process].rt = total_time - data[running_process].at;
     }
-
-    
-
-
     /* TODO 
     1. If there is a worker process running, then decrement its remaining burst
     and print messages as follows:
@@ -256,7 +237,6 @@ void schedule_handler(int signum) {
     3.C.2. or resume the process {running_process} if it is stopped and print the message:
     "Scheduler: Resuming Process {running_process} (Remaining Time: {data[running_process].burst})"
     */
-
 }
 
 

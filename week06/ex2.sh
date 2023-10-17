@@ -3,5 +3,5 @@
 gcc scheduler.c -o scheduler
 gcc worker.c -o worker
 
-./scheduler new_data.txt
+./scheduler data.txt
 #./worker

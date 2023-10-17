@@ -20,7 +20,7 @@ long tris;
 bool is_triangular(long n){
     for (long i = 1; i <= n; i++){
       if (i * (i + 1) == 2 * n){
-         return true;
+        return true;
       }
     }
    return false;
