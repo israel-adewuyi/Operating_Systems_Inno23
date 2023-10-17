@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/time.h>
+#include <limits.h>
 #define PS_MAX 10
 
 // holds the scheduling data of one process
@@ -75,6 +76,7 @@ void suspend(pid_t process) {
 // send signal SIGTERM to the worker process
 void terminate(pid_t process) {
     if (process > 0) {
+        //printf("I am terminating the process with %u\n", process);
         kill(process, SIGTERM);
     }
     // TODO: send signal SIGTERM to the worker process if it is not in one of the states
@@ -118,15 +120,17 @@ void create_process(int new_process) {
 
 // find next process for running
 ProcessData find_next_process() {
+    //printf("I entered\n");
 
   // location of next process in {data} array
 	int location = 0;
+    int min_at = INT_MAX;
 
 	for(int i=0; i < data_size; i++) {
-        if (data[i].at <= total_time && data[i].rt > 0) {
-            if (data[i].at < data[location].at || (data[i].at == data[location].at && data[i].idx < data[location].idx)) {
-                location = i;
-            }
+        if (data[i].at < min_at && data[i].burst > 0) {
+            location = i;
+            min_at = data[i].at;
+            //break; // Found the next eligible process
         }
         // TODO: find location of the next process to run from the {data} array
         // Considering the scheduling algorithm FCFS
@@ -196,12 +200,13 @@ void schedule_handler(int signum) {
 
     if (running_process != -1) {
         data[running_process].burst--;
-        printf("Scheduler: Runtime: %u seconds\n", total_time);
+        printf("Scheduler: Runtime: %u seconds\n\n\n", total_time);
         printf("Process %d is running with %d seconds left\n", running_process, data[running_process].burst);
 
         if (data[running_process].burst == 0) {
             printf("Scheduler: Terminating Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
             terminate(ps[running_process]);
+            //printf("I am killing process %d\n", running_process);
             waitpid(ps[running_process], NULL, 0);
             data[running_process].ct = total_time;
             data[running_process].tat = data[running_process].ct - data[running_process].at;
@@ -212,6 +217,8 @@ void schedule_handler(int signum) {
     check_burst();
 
     ProcessData next_process = find_next_process();
+
+    //printf("Next process is %d, %d\n", next_process.idx, next_process.burst);
     if (next_process.idx != running_process) {
         if (running_process != -1) {
             printf("Scheduler: Stopping Process %d (Remaining Time: %d)\n", running_process, data[running_process].burst);
