@@ -7,11 +7,13 @@
 
 int main() {
     // Step 1: Create an empty file text.txt
+    
     int fd = open("text.txt", O_CREAT | O_RDWR, 0666);
     if (fd == -1) {
         perror("Failed to open text.txt");
         exit(1);
     }
+
 
     // Step 2: Open /dev/random and generate the file content
     int dev_random = open("/dev/random", O_RDONLY);
@@ -30,7 +32,7 @@ int main() {
                 write(fd, &c, 1);
                 char_count++;
                 line_length++;
-                if (line_length >= 1024) {
+                if (line_length >= 1024){
                     // Add a newline character after 1024 characters
                     write(fd, "\n", 1);
                     line_length = 0;
@@ -41,13 +43,14 @@ int main() {
 
     close(dev_random);
 
-    // Step 3: Count the capital letters in the mapped chunks
     long page_size = sysconf(_SC_PAGESIZE);
     long chunk_size = 1024 * page_size;
 
-    // Step 4: Map the file in chunks
+    // Step 3: Map the file in chunks
     off_t file_size = lseek(fd, 0, SEEK_END);
     off_t offset = 0;
+
+    long long int total_count = 0;
 
     while (offset < file_size) {
         off_t map_size = (file_size - offset > chunk_size) ? chunk_size : (file_size - offset);
@@ -59,13 +62,14 @@ int main() {
             exit(1);
         }
 
-        // Step 5: Count and replace capital letters with lowercase
+        // Step 4: Count and replace capital letters with lowercase
         int capital_count = 0;
         for (off_t i = 0; i < map_size; i++) {
             if (isupper(file_data[i])) {
                 file_data[i] = tolower(file_data[i]);
                 capital_count++;
             }
+            total_count += capital_count;
         }
 
         printf("Chunk offset %ld: Capital letters = %d\n", offset, capital_count);
@@ -74,7 +78,8 @@ int main() {
         offset += map_size;
     }
 
-    // Step 6: Close and unmap the file
+    printf("Capital letters = %lld\n", total_count);
+
     close(fd);
 
     return 0;
