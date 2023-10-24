@@ -1,0 +1,22 @@
+israel@Ubuntu:~/Operating_Systems_Inno23/week07$ ./ex1.sh
+First Fit Throughput: 69.4241 queries per second
+Worst Fit Throughput: 46.8124 queries per second
+Best Fit Throughput: 51.6051 queries per second
+
+israel@Ubuntu:~/Operating_Systems_Inno23/week07$ ./ex1.sh
+First Fit Throughput: 75.8200 queries per second
+Worst Fit Throughput: 50.3807 queries per second
+Best Fit Throughput: 50.7574 queries per second
+
+israel@Ubuntu:~/Operating_Systems_Inno23/week07$ ./ex1.sh
+First Fit Throughput: 72.0416 queries per second
+Worst Fit Throughput: 48.5166 queries per second
+Best Fit Throughput: 49.2077 queries per second
+
+Three consecutive runs produced these outputs. It is observed that the first 
+fit allocation algorithm performs faster than the Worst fit or Best fit. This is because
+in the first fit allocation algorithm, it allocates the adrs to the first "valid" 
+contiguous memory segment it finds and doesn't bother about optimizing the allocation. 
+
+There is almost negligible difference between the Worst fit and the Best fir allocation
+algorithm. 
