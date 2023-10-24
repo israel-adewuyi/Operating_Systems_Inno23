@@ -203,6 +203,7 @@ int main(){
 
     printf("Worst Fit Throughput: %.4f queries per second\n", (float)total_queries / total_time);
 
+    fclose(input_file);
     
 
     initialize_memory();
@@ -244,5 +245,5 @@ int main(){
 
     printf("Best Fit Throughput: %.4f queries per second\n", (float)total_queries / total_time);
 
-    
+    fclose(input_file);
 }
