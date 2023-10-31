@@ -17,40 +17,38 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Generate a random password
-    char password[9];  // 8 characters + null terminator
+    // Generate a random password, "pass" + 8 characters + null terminator
+    char * password = malloc(14); 
+
     int urandom_fd = open("/dev/urandom", O_RDONLY);
     if (urandom_fd == -1) {
         perror("Error opening /dev/urandom");
         exit(1);
     }
 
-    int idx = 0;
+    password[0] = 'p';
+    password[1] = 'a';
+    password[2] = 's';
+    password[3] = 's';
+    password[4] = ':';
+
+    int idx = 5;
     char c;
-    while(idx < 8){
+    while(idx < 13){
         if (read(urandom_fd, &c, 1) == 1) {
             if (isprint(c)) {
                 password[idx] = c;
                 idx++;
             }
-            if(idx == 8)break;
+            if(idx == 13)break;
         }
     }
     
     close(urandom_fd);
 
-    password[8] = '\0';  // Null-terminate the string
+    password[13] = '\0';  // Null-terminate the string
 
-    // Store the password in memory using mmap
-    char *mem_password = mmap(NULL, 14, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (mem_password == MAP_FAILED) {
-        perror("Error mapping memory");
-        exit(1);
-    }
-    strcpy(mem_password, "pass:");
-    strcat(mem_password, password);
-
-    printf("%s\n", mem_password);
+    printf("%s\n", password);
 
     // Wait in an infinite loop
     while (1) {

@@ -1,24 +1,25 @@
 #!/bin/bash
 
-# Read the PID from the file
 PID=$(cat /tmp/ex1.pid)
 
-# Extract the start and end addresses of the mapped region
-MAPS_ENTRY=$(grep -m 1 "pass:" /proc/$PID/maps)
-START_ADDRESS=$(echo $MAPS_ENTRY | awk '{print $1}')
-END_ADDRESS=$(echo $MAPS_ENTRY | awk '{print $2}')
+HEAP_INFO=$(grep "[ ]*heap" /proc/$PID/maps)
+START_ADDR=$(echo $HEAP_INFO | awk '{print $1}' | cut -d'-' -f1)
+END_ADDR=$(echo $HEAP_INFO | awk '{print $1}' | cut -d'-' -f2)
 
-# Append "0x" to the start address
-MAPPED_PASSWORD_ADDR="0x$START_ADDRESS"
+OFFSET=$((0x$START_ADDR))
+LENGTH=$((0x$END_ADDR - 0x$START_ADDR))
 
-# Use xxd to read the password from memory
-#PASSWORD=$(sudo xxd -l 9 -p /proc/$PID/mem -s $MAPPED_PASSWORD_ADDR)
+PASSWORD_HEX_DUMP=$(sudo dd if=/proc/$PID/mem bs=1 skip=$OFFSET count=$LENGTH 2>/dev/null | xxd | grep -A 8 "pass:" | head -9)
 
-# Print the password and its memory address
-#echo "Password: $PASSWORD"
-echo "Memory Address: $START_ADDRESS"
-echo "Process: $PID"
+PASS_VALUE=$(echo "$PASSWORD_HEX_DUMP" | grep -oP '(?<=pass:).{8}')
 
-# Send SIGKILL to the process
-sudo kill -9 $PID
+ADDR_HEX=$(echo "$PASSWORD_HEX_DUMP" | head -n 1 | awk '{print $1}' | tr -d ':')
+ADDR_DEC=$((16#$ADDR_HEX))
 
+
+ACTUAL_ADDR=$(printf '%x' $(($OFFSET + $ADDR_DEC)))
+
+echo "Password: $PASS_VALUE"
+echo "Memory Address: 0x$ACTUAL_ADDR"
+
+sudo kill -SIGKILL $PID
