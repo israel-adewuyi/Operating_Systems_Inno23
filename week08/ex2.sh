@@ -1,15 +1,23 @@
 #!/bin/bash
 
-# Compile the programs
-gcc mmu.c -o mmu -lrt
-gcc pager.c -o pager -lrt
+mkdir -p /tmp/ex2
+touch /tmp/ex2/pagetable
 
-# Run pager in the background
+
+gcc pager.c -o pager 
+gcc mmu.c -o mmu
+
+ 
 ./pager 4 2 &
-pager_pid=$!
+pid_pager=$!
 
-# Run mmu
-./mmu 4 R0 R1 W1 R0 R2 W2 R0 R3 W2 $pager_pid pager
+sleep 3
 
-# Clean up
-wait $pager_pid
+gnome-terminal -- bash -c "./mmu 4 R0 R1 W1 R0 R2 W2 R0 R3 W2 $pid_pager; exec bash"
+
+
+rm pager mmu
+
+wait
+
+rm -r /tmp/ex2
