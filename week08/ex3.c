@@ -4,29 +4,31 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#define MB 1024 * 1024
+#define SECONDS 10
+#define SIZE 10 * 1024 * 1024
 
 int main() {
     struct rusage usage;
     int i;
     
-    for (i = 0; i < 10; i++) {
-        char *ptr = (char *)malloc(100 * MB);
+    for (i = 0; i < SECONDS; i++) {
+        char *ptr = (char *)malloc(SIZE);
         
         if (ptr == NULL) {
             perror("Memory allocation failed");
             exit(1);
         }
         
-        memset(ptr, 0, 100 * MB);
+        memset(ptr, 0, SIZE);
         
-        getrusage(RUSAGE_SELF, &usage);
-        
-        printf("Memory usage (MB): %ld\n", usage.ru_maxrss / 1024);
+        if(getrusage(RUSAGE_SELF, &usage) == 0){
+            printf("Memory usage : %ld KB\n", usage.ru_maxrss);
+        }
+        else{
+            perror("Failed to get memory usage");
+        }
         
         sleep(1);
-
-        free(ptr);
     }
 
     
