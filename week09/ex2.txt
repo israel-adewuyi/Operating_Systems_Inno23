@@ -1,0 +1,13 @@
+Reference string 1, provided as input in gist doc.
+Number of pages (num_pages) = 1000
+Number of frames (num_frames) = 50
+Miss ratio = 0.81
+
+Reference string 2 "R0 R1 R0 W1 R0 R1 R0 W1 R0 R2 R0 W2 R0 R2 R0 W2 R0 R3 R0 W3 R0 R3 R0 W3 R0 R4 R0 W4 R0 R4 R0 W4", {see ex22.sh}
+Number of pages (num_pages) = 6
+Number of frames (num_frames) = 3
+Miss ratio = 1.00
+
+The second test with a miss ratio of 1 suggests that the TLB was inadequate for the workload, while the first test with a miss ratio of 0.81 indicates 
+that the TLB was more effective due to its larger size, resulting in fewer TLB misses and fewer page table lookups. This indicates there might be a correlation
+between the size of the TLB and the number of pages. 

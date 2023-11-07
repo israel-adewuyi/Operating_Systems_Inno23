@@ -1,0 +1,9 @@
+Hit ratio of the three algorithms
+- Random Algorithm: Hit ratio is 0.055 
+- NFU Algorithm: Hit ratio is 0.044 
+- Aging Algorithm: Hit ratio is 0.046
+
+
+The random page replacement algorithm seems to be the least efficient at reducing page faults, while the NFU and aging algorithms have similar hit ratios, with the NFU algorithm performing 
+slightly better with the specific test provided. These hit ratios also suggest that there is a relatively high rate of page faults, and there may be room for improvement in 
+the page replacement strategy to further reduce page faults and improve system performance.
