@@ -1,0 +1,8 @@
+1. Did `monitor.c` report an event for `myfile11.txt`? 	
+- Yes. The creation, modification and deletion of the file was reported by the monitor.c
+
+2. Did `monitor.c` report an event for `myfile13.txt`?
+- Modifications to myfile13.txt were not reported. This is due to the fact that sym links do not cause events to be triggered when the file it points to is modified. But the creation of myfile13.txt was reported.
+
+3. Check the number of hard links and explain the difference.
+- The hard link count for `myfile11.txt` is  2, myfile11.txt and myfile1.txt. This is because duplicates have been removed. Executing the removal of hard links for the path /tmp will reduce the count of hardlinks by 1, since myfile1.txt will be unlinked.

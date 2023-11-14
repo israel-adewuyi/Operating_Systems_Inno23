@@ -4,158 +4,197 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <dirent.h>
 #include <string.h>
 #include <limits.h>
+#include <dirent.h>
 
-void find_all_hlinks(const char *source) {
+//path to watched directory
+char *path;
+
+// Function to find all hard links to a given file
+
+void find_all_hlinks(const char* source) {
     struct stat st;
     if (lstat(source, &st) == -1) {
         perror("lstat");
         exit(EXIT_FAILURE);
     }
 
-    DIR *dir = opendir(".");
-    if (dir == NULL) {
+    printf("Hard links to %s (inode %lu):\n", source, (unsigned long)st.st_ino);
+
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL) {
         perror("opendir");
         exit(EXIT_FAILURE);
     }
 
-    struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_REG) {
-            struct stat cur_st;
-            if (lstat(entry->d_name, &cur_st) == -1) {
-                perror("lstat");
-                exit(EXIT_FAILURE);
-            }
+	char entry_path[PATH_MAX];
+    	snprintf(entry_path, sizeof(entry_path), "%s/%s", path, entry->d_name);
+        struct stat entry_stat;
+        if (lstat(entry_path, &entry_stat) == -1) {
+            perror("lstat");
+            exit(EXIT_FAILURE);
+        }
 
-            if (st.st_ino == cur_st.st_ino) {
-                char absolute_path[PATH_MAX];
-                realpath(entry->d_name, absolute_path);
-                printf("Hard link: %s (Inode: %lu) -> %s\n", entry->d_name, st.st_ino, absolute_path);
-            }
+        if (entry_stat.st_ino == st.st_ino && strcmp(entry_path, source) != 0) {
+            printf("Hard link :\n\tInode: %lu, Path: %s\n",
+                    (unsigned long)entry_stat.st_ino, entry_path);
         }
     }
-
+    printf("\n");
     closedir(dir);
 }
 
-void unlink_all(const char *source) {
+// Function to unlink all duplicates of a hard link, keeping only one
+void unlink_all(const char* source) {
     struct stat st;
     if (lstat(source, &st) == -1) {
         perror("lstat");
         exit(EXIT_FAILURE);
     }
 
-    DIR *dir = opendir(".");
-    if (dir == NULL) {
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL) {
         perror("opendir");
         exit(EXIT_FAILURE);
     }
 
-    struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_REG) {
-            struct stat cur_st;
-            if (lstat(entry->d_name, &cur_st) == -1) {
-                perror("lstat");
+    	char entry_path[PATH_MAX];
+    	snprintf(entry_path, sizeof(entry_path), "%s/%s", path, entry->d_name);
+        
+        struct stat entry_stat;
+        if (lstat(entry_path, &entry_stat) == -1) {
+            perror("lstat");
+            exit(EXIT_FAILURE);
+        }
+
+        if (entry_stat.st_ino == st.st_ino && strcmp(entry_path, source) != 0) {
+            if (unlink(entry_path) == -1) {
+                perror("unlink");
                 exit(EXIT_FAILURE);
             }
-
-            if (st.st_ino == cur_st.st_ino && strcmp(source, entry->d_name) != 0) {
-                unlink(entry->d_name);
-            }
+            printf("Successefull unlink happen for: %s\n", entry_path);
         }
     }
-
+    printf("\n");
     closedir(dir);
 }
 
-void create_sym_link(const char *source, const char *link) {
-    if (symlink(source, link) == -1) {
+// Function to create a symbolic link to a file in the watched directory
+void create_sym_link(const char* source, const char* link) {
+    char link_path[PATH_MAX];
+    snprintf(link_path, sizeof(link_path), "%s/%s", path, link);
+
+    if (symlink(source, link_path) == -1) {
         perror("symlink");
         exit(EXIT_FAILURE);
     }
-
-    printf("Symbolic link created: %s -> %s\n", link, source);
+    printf("Symbolic link {%s} created for source %s\n\n", link_path, source);
 }
 
-void print_stat(const char *path) {
-    struct stat st;
-    if (lstat(path, &st) == -1) {
-        perror("lstat");
-        exit(EXIT_FAILURE);
-    }
+void print_stat_info(const char *entry_name) {
+    char full_path[PATH_MAX];
+    sprintf(full_path, "%s/%s", path, entry_name);
 
-    printf("File: %s\n", path);
-    printf("Inode: %lu\n", st.st_ino);
-    printf("Size: %lld bytes\n", (long long)st.st_size);
-    // Add more stat information as needed
+    struct stat st;
+    if (stat(full_path, &st) == 0) {
+        printf("Stat info for %s:\n", full_path);
+        printf("  Size: %ld bytes\n", st.st_size);
+        printf("  Inode: %ld\n", st.st_ino);
+        printf("  Number of Hard Links: %ld\n", st.st_nlink);
+    }
+    printf("\n");
 }
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <directory>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <watched_directory_path>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    // Create a file and two hard links
-    int fd = open("myfile1.txt", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if (fd == -1) {
-        perror("open");
+    path = argv[1];
+
+    // Create myfile1.txt with content "Hello world."
+    char myfile1_path[PATH_MAX];
+    snprintf(myfile1_path, sizeof(myfile1_path), "%s/myfile1.txt", path);
+
+    FILE *myfile1 = fopen(myfile1_path, "w");
+    if (myfile1 == NULL) {
+        perror("fopen");
         exit(EXIT_FAILURE);
     }
-    close(fd);
+     
+    
+    fprintf(myfile1, "Hello world.\n");
+     
+    
+    fclose(myfile1);
 
-    link("myfile1.txt", "myfile11.txt");
-    link("myfile1.txt", "myfile12.txt");
+    // Create hard links to myfile1.txt
+    char myfile11_path[PATH_MAX];
+    char myfile12_path[PATH_MAX];
+    snprintf(myfile11_path, sizeof(myfile11_path),
+             "%s/myfile11.txt", path);
+    snprintf(myfile12_path, sizeof(myfile12_path),
+             "%s/myfile12.txt", path);
 
-    // Find all hard links to myfile1.txt
-    find_all_hlinks("myfile1.txt");
-
-    // Move the file to another folder
-    if (rename("myfile1.txt", "/tmp/myfile1.txt") == -1) {
-        perror("rename");
-        exit(EXIT_FAILURE);
-    }
-
-    // Modify the content of myfile11.txt
-    fd = open("myfile11.txt", O_WRONLY | O_APPEND);
-    if (fd == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-    write(fd, " Additional text", 17);
-    close(fd);
-
-    // Check if monitor.c reported an event for myfile11.txt
-    // Provide your answer and justification in ex1.txt
-
-    // Create a symbolic link to /tmp/myfile1.txt
-    create_sym_link("/tmp/myfile1.txt", "myfile13.txt");
-
-    // Modify the content of /tmp/myfile1.txt
-    fd = open("/tmp/myfile1.txt", O_WRONLY | O_APPEND);
-    if (fd == -1) {
-        perror("open");
+    if (link(myfile1_path, myfile11_path) == -1 || link(myfile1_path, myfile12_path) == -1) {
+        perror("link");
         exit(EXIT_FAILURE);
     }
     
-    write(fd, " Additional text", 17);
-    close(fd);
+     
 
-    // Check if monitor.c reported an event for myfile13.txt
-    // Provide your answer and justification in ex1.txt
+    // Find and print all hard links to myfile1.txt
+    find_all_hlinks(myfile1_path);
+         
+
+    // Move myfile1.txt to /tmp/myfile1.txt
+    if (rename(myfile1_path, "/tmp/myfile1.txt") == -1) {
+        perror("rename");
+        exit(EXIT_FAILURE);
+    }
+     
+
+    // Modify myfile11.txt
+    FILE *myfile11 = fopen(myfile11_path, "a");
+    if (myfile11 == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+     
+    
+    fprintf(myfile11, "Modified file.");
+     
+    fclose(myfile11);
+
+
+    // Create symbolic link myfile13.txt to /tmp/myfile1.txt
+    create_sym_link("/tmp/myfile1.txt", "myfile13.txt");
+
+    // Modify /tmp/myfile1.txt
+    FILE *tmpfile1 = fopen("/tmp/myfile1.txt", "a");
+    if (tmpfile1 == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    
+    fprintf(tmpfile1, "/tmp/myfile1.txt has been modified.");
+     
+    fclose(tmpfile1);
 
     // Remove duplicates of hard links to myfile11.txt
-    unlink_all("myfile11.txt");
+    unlink_all(myfile11_path);
+     
 
-    // Print stat info for the kept hard link
-    print_stat("myfile11.txt");
-
-    // Check the number of hard links and explain the difference
-    // Provide your answer in ex1.txt
-
+     
+    printf("Stat info for the kept hard link:\n");
+    print_stat_info("myfile11.txt");
     return 0;
 }
