@@ -1,0 +1,49 @@
+Output when the root is changed:
+ex1
+..
+lost+found
+lib
+.
+file1
+lib64
+file2
+bin
+\nOutput when the root is unchanged:
+cdrom
+tmp
+etc
+lib64
+boot
+..
+sbin
+libx32
+dev
+.
+snap
+opt
+sys
+lost+found
+proc
+swapfile
+bin
+usr
+lib
+root
+srv
+home
+media
+run
+var
+lib32
+mnt
+
+
+
+
+-------------------- DIFFERENCES --------------------
+1. File System Structure:
+	Changed Root: The output only shows the contents of the lofsdisk directory. It includes ex1, file1 and file2 (created within the chroot environment), and standard directories like bin and lib.
+	Unchanged Root: The output shows the entire file system hierarchy, starting from the root (/). It includes standard directories such as etc, bin, lib, usr, etc.
+2. Missing Standard System Directories:
+	Changed Root: Standard system directories like /etc, /usr, /var, etc., are not present. The focus is on the contents of the lofsdisk directory.
+	Unchanged Root: Full system directory structure is visible, including essential directories like /etc, /usr, /var, etc.

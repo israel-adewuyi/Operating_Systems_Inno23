@@ -1,68 +1,77 @@
 #!/bin/bash
 
-# Step 1: Create a file lofs.img not less than 50 MiB using dd
-sudo dd if=/dev/zero of=lofs.img bs=1M count=50
-
-# Step 2: Setup a loop device on the created file using losetup
-sudo losetup -fP lofs.img
-
-losetup -a
-
-# Step 3: Create a Loop File System (LOFS) ext4 on the loop device using mkfs
-sudo mkfs.ext4 lofs.img
-
-# Step 4: Create a new empty directory ./lofsdisk
-mkdir lofsdisk
-
-# Step 5: Mount the created filesystem on the mount point ./lofsdisk
-#sudo umount ./lofsdisk
-sudo mount -o loop /dev/loop28 lofsdisk/
-
-# Step 6: Add two files file1, file2 to the LOFS with first and last name
-echo "Israel" | sudo tee ./lofsdisk/file1
-echo "Adewuyi" | sudo tee ./lofsdisk/file2
-
-# Step 7: Copy ex1.c to lofsdisk directory
-sudo cp ex1.c ./lofsdisk
-
-
-# Step 8: Define a function get_libs() to get shared libraries of a binary
+# Function to retrieve shared libraries associated with a binary
 get_libs() {
-    ldd $1 | awk '{print $3}' | grep '/' | tr '\n' ' '
+    # Execute 'ldd' on the specified binary and utilize 'awk' to filter only shared libraries
+    ldd "$1" | awk 'BEGIN{ORS=" "}$1~/^\/lib/{print $1}$2~/=>/ && $3~/^\/lib/{print $3}'
 }
 
-# Step 9: Use the function to get shared libraries of specified commands and add them to LOFS
-libs_bash=$(get_libs $(which bash))
-libs_cat=$(get_libs $(which cat))
-libs_echo=$(get_libs $(which echo))
-libs_ls=$(get_libs $(which ls))
+# Compile ex1.c to generate the executable file named ex1
+gcc ex1.c -o ex1
 
-sudo cp $(which bash) $(which cat) $(which echo) $(which ls) ./lofsdisk
+# Create a file with a size of at least 50 MiB
+dd if=/dev/zero of=lofs.img bs=1M count=50
 
-ls ./lofsdisk/*
+# Set up a loop device for the created file
+LOOP_DEVICE=$(sudo losetup --find --show lofs.img)
+# Retrieve the loop device number (required for association with LOFS)
+LOOP_NUMBER=${LOOP_DEVICE#/dev/loop}
 
-sudo chmod -R 755 ./lofsdisk
+# Create a Loop File System (LOFS) with the ext4 format on the previously created file
+sudo mkfs.ext4 "$LOOP_DEVICE"
 
+# Create a new empty directory named ./lofsdisk
+mkdir -p ./lofsdisk
 
-# Step 8: Copy necessary files for compilation (gcc and related files) to lofsdisk directory
-sudo cp $(which gcc) $(which cpp) /lib/x86_64-linux-gnu/libgcc* /lib/x86_64-linux-gnu/libstdc++* /lib64/ld-linux-x86-64* /bin/bash /lib/x86_64-linux-gnu/libtinfo.so.5 ./lofsdisk
+# Mount the generated filesystem at the mount point ./lofsdisk
+sudo mount lofs.img ./lofsdisk
 
-# Step 9: Compile ex1.c inside the chroot environment
-sudo chroot ./lofsdisk /bin/bash -c 'cd / && ln -s usr/lib lib && gcc -o ex1 ex1.c'
+# Add a file named file1 with the content "Israel" to the LOFS
+echo "Israel" | sudo tee ./lofsdisk/file1 > /dev/null
+# Add a file named file2 with the content "Adewuyi" to the LOFS
+echo "Adewuyi" | sudo tee ./lofsdisk/file2 > /dev/null
 
+# Copy the necessary binaries and their shared libraries to the LOFS
+for item in bash cat echo ls; do
+    # Save the absolute path for the command being processed
+    cmd=/bin/$item
+    # Output information about the current command being processed
+    echo "Processing command: $cmd"
+    # Retrieve shared libraries associated with the command
+    res=$(get_libs "$cmd")
+    for i in $res; do
+        # Output information about the current shared library being processed
+        echo "Processing library: $i"
+        # Create the directory structure in the LOFS for the library
+        sudo mkdir -p "./lofsdisk$(dirname $i)"
+        # Copy the library to the LOFS
+        sudo cp "$i" "./lofsdisk$i"
+    done
+    # Create the directory structure in the LOFS for the command
+    sudo mkdir -p "./lofsdisk$(dirname $cmd)"
+    # Copy the command to the LOFS
+    sudo cp "$cmd" "./lofsdisk$cmd"
+done
 
-# Step 10: Change the root directory of the process to the mount point of the LOFS and run ex1
-sudo chroot ./lofsdisk /ex1 > ex1.txt
-#sudo chroot ./lofsdisk gcc ex1.c -o ex1
-#sudo chroot ./lofsdisk /ex1 > ex1.txt
+# Copy the ex1 executable to the LOFS
+sudo cp ex1 ./lofsdisk/ex1
 
-# Step 11: Run the same program again without changing the root directory and append the output
-sudo ./lofsdisk/ex1 >> ex1.txt
+# Add an explanatory line to ex1.txt for human understanding
+echo "Output when the root is changed:" > ex1.txt
+# Change the root directory of the process to the mount point of the LOFS
+sudo chroot ./lofsdisk ./ex1 >> ex1.txt
 
-# Step 12: Display the difference between the outputs and add it to ex1.txt
-diff ex1.txt ex1.txt >> ex1.txt
-
-# Step 13: Cleanup - Unmount the LOFS and remove the loop device
+# Unmount the filesystem
 sudo umount ./lofsdisk
-sudo losetup -d /dev/loop0
+
+# Clean up the loop device
+sudo wipefs -a "/dev/loop$LOOP_NUMBER"
+
+# Remove the directory ./lofsdisk
+sudo rm -r ./lofsdisk
+
+# Add an explanatory line to ex1.txt for human understanding
+echo "\nOutput when the root is unchanged:" >> ex1.txt
+# Run ex1 again without changing the root directory
+./ex1 >> ex1.txt
 
