@@ -16,7 +16,7 @@ mkdir lofsdisk
 
 # Step 5: Mount the created filesystem on the mount point ./lofsdisk
 #sudo umount ./lofsdisk
-sudo mount -o loop /dev/loop24 lofsdisk/
+sudo mount -o loop /dev/loop28 lofsdisk/
 
 # Step 6: Add two files file1, file2 to the LOFS with first and last name
 echo "Israel" | sudo tee ./lofsdisk/file1
@@ -39,12 +39,22 @@ libs_ls=$(get_libs $(which ls))
 
 sudo cp $(which bash) $(which cat) $(which echo) $(which ls) ./lofsdisk
 
-sudo cp /lib/x86_64-linux-gnu/{libtinfo.so.6,libc.so.6,libselinux.so.1,libpcre2-8.so.0} lofsdisk/usr/lib/x86_64-linux-gnu/
-sudo cp /lib64/ld-linux-x86-64.so.2 lofsdisk/usr/lib64/
+ls ./lofsdisk/*
+
+sudo chmod -R 755 ./lofsdisk
+
+
+# Step 8: Copy necessary files for compilation (gcc and related files) to lofsdisk directory
+sudo cp $(which gcc) $(which cpp) /lib/x86_64-linux-gnu/libgcc* /lib/x86_64-linux-gnu/libstdc++* /lib64/ld-linux-x86-64* /bin/bash /lib/x86_64-linux-gnu/libtinfo.so.5 ./lofsdisk
+
+# Step 9: Compile ex1.c inside the chroot environment
+sudo chroot ./lofsdisk /bin/bash -c 'cd / && ln -s usr/lib lib && gcc -o ex1 ex1.c'
+
 
 # Step 10: Change the root directory of the process to the mount point of the LOFS and run ex1
-sudo chroot ./lofsdisk gcc -o /ex1 ex1.c
 sudo chroot ./lofsdisk /ex1 > ex1.txt
+#sudo chroot ./lofsdisk gcc ex1.c -o ex1
+#sudo chroot ./lofsdisk /ex1 > ex1.txt
 
 # Step 11: Run the same program again without changing the root directory and append the output
 sudo ./lofsdisk/ex1 >> ex1.txt
